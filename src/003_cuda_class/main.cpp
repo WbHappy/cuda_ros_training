@@ -20,11 +20,11 @@ int main(int argc, char** argv){
 
     CudaClass cuda_object(h_a, h_b, h_c, N);
 
-    cuda_object.AllocateDeviceMemory();
-    cuda_object.CopyInputToDevice();
-    cuda_object.RunKernelGPU();
-    cuda_object.CopyOutputToHost();
-    cuda_object.FreeDeviceMemory();
+    cuda_object.allocateDeviceMemory();
+    cuda_object.copyInputToDevice();
+    cuda_object.runKernelGPU();
+    cuda_object.copyOutputToHost();
+    cuda_object.freeDeviceMemory();
 
     for(int i = 0; i < N; i++){
         printf("%d\n", h_c[i]);

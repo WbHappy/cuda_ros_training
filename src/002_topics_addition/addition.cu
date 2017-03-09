@@ -5,7 +5,7 @@ __global__ void addition(int* a, int* b, int* c){
     *c = *a + *b;
 }
 
-void setupCuda(int* D_A, int* D_B, int* D_C, int* A, int* B, int* C){
+void setupCuda(int* &D_A, int* &D_B, int* &D_C, int* &A, int* &B, int* &C){
     cudaMalloc((void**)&D_A, sizeof(int));
     cudaMalloc((void**)&D_B, sizeof(int));
     cudaMalloc((void**)&D_C, sizeof(int));

@@ -7,15 +7,21 @@
 int * A, * B, * C;
 int * D_A, * D_B, * D_C;
 
+
+
 void callbackA(const std_msgs::Int32 msg){
     *A = msg.data;
+    copyInputToDevice(D_A, D_B, D_C, A, B, C);
     executeKernel(D_A, D_B, D_C, A, B, C);
+    copyOutputToHost(D_A, D_B, D_C, A, B, C);
     ROS_INFO("C = %d | device", *C);
 }
 
 void callbackB(const std_msgs::Int32 msg){
     *B = msg.data;
+    copyInputToDevice(D_A, D_B, D_C, A, B, C);
     executeKernel(D_A, D_B, D_C, A, B, C);
+    copyOutputToHost(D_A, D_B, D_C, A, B, C);
     ROS_INFO("C = %d | device", *C);
 }
 
@@ -32,7 +38,6 @@ int main(int argc, char** argv){
 
     // CUDA SETUP
     setupCuda(D_A, D_B, D_C, A, B, C);
-
 
     ros::Subscriber sub_a = nh.subscribe("/cuda/input/a", 100, &callbackA);
     ros::Subscriber sub_b = nh.subscribe("/cuda/input/b", 100, &callbackB);

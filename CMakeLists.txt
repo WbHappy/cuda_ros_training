@@ -27,6 +27,11 @@ cuda_add_executable(topics_addition
 target_link_libraries(topics_addition ${catkin_LIBRARIES})
 
 cuda_add_executable(cuda_class
-    src/002_cuda_class/main.cpp
-    src/002_cuda_class/cuda_class.cu)
+    src/003_cuda_class/main.cpp
+    src/003_cuda_class/cuda_class.cu)
 target_link_libraries(cuda_class ${catkin_LIBRARIES})
+
+cuda_add_executable(topics_addition_class
+    src/004_topics_addition_class/main.cpp
+    src/004_topics_addition_class/addition.cu)
+target_link_libraries(topics_addition_class ${catkin_LIBRARIES})
