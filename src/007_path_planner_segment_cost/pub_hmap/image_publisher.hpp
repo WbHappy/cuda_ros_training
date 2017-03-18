@@ -2,6 +2,7 @@
 #define IMAGEPUBLISHER_HPP_
 
 #include <ros/ros.h>
+#include <ros/package.h>
 #include <image_transport/image_transport.h>
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
@@ -40,11 +41,13 @@ public:
         header.seq = 0;
         header.frame_id = "";
 
-        cv_img = cv::Mat(256, 256, CV_8UC1);
+        // cv_img = cv::Mat(256, 256, CV_8UC1);
+        // for(int i = 0; i < 256*256; i++){
+        //     *(cv_img.data + i) = 100;
+        // }
 
-        for(int i = 0; i < 256*256; i++){
-            *(cv_img.data + i) = 100;
-        }
+        std::string path = ros::package::getPath("cuda_training");
+        cv_img = cv::imread(path+"/src/007_path_planner_segment_cost/pub_hmap/hmap.png" , cv::IMREAD_GRAYSCALE);
 
     }
 

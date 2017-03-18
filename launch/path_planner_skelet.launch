@@ -1,0 +1,6 @@
+<launch>
+    <node name="path_planner_skelet" pkg="cuda_training" type="path_planner_skelet" output="screen"/>
+
+    <node name="path_planner_skelet_pub_hmap" pkg="cuda_training" type="path_planner_skelet_pub_hmap" output="screen"/>
+
+</launch>

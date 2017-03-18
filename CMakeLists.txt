@@ -11,7 +11,11 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     rospy
     std_msgs
+    cv_bridge
+    image_transport
 )
+
+find_package(OpenCV 3.0.0 REQUIRED)
 
 include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
@@ -35,3 +39,29 @@ cuda_add_executable(topics_addition_class
     src/004_topics_addition_class/main.cpp
     src/004_topics_addition_class/addition.cu)
 target_link_libraries(topics_addition_class ${catkin_LIBRARIES})
+
+cuda_add_executable(errors_tracking
+    src/005_errors_tracking/main.cpp
+    src/005_errors_tracking/addition.cu
+    src/005_errors_tracking/gpu_errchk.cu)
+target_link_libraries(errors_tracking ${catkin_LIBRARIES})
+
+cuda_add_executable(path_planner_skelet
+    src/006_path_planner_skelet/main.cpp
+    src/006_path_planner_skelet/ros_wrapper.cpp
+    src/006_path_planner_skelet/gpu_algorithm.cu
+    src/006_path_planner_skelet/gpu_errchk.cu)
+target_link_libraries(path_planner_skelet ${catkin_LIBRARIES})
+cuda_add_executable(path_planner_skelet_pub_hmap
+    src/006_path_planner_skelet/pub_hmap/main.cpp)
+target_link_libraries(path_planner_skelet_pub_hmap ${catkin_LIBRARIES})
+
+cuda_add_executable(path_planner_segment_cost
+    src/007_path_planner_segment_cost/main.cpp
+    src/007_path_planner_segment_cost/ros_wrapper.cpp
+    src/007_path_planner_segment_cost/gpu_path_planner.cu
+    src/007_path_planner_segment_cost/gpu_errchk.cu)
+target_link_libraries(path_planner_segment_cost ${catkin_LIBRARIES})
+cuda_add_executable(path_planner_segment_cost_pub_hmap
+    src/007_path_planner_segment_cost/pub_hmap/main.cpp)
+target_link_libraries(path_planner_segment_cost_pub_hmap ${catkin_LIBRARIES})

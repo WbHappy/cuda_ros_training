@@ -1,0 +1,6 @@
+<launch>
+    <node name="path_planner_segment_cost" pkg="cuda_training" type="path_planner_segment_cost" output="screen"/>
+
+    <node name="path_planner_segment_cost_pub_hmap" pkg="cuda_training" type="path_planner_segment_cost_pub_hmap" output="screen"/>
+
+</launch>
