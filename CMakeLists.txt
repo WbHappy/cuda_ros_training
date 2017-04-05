@@ -65,3 +65,23 @@ target_link_libraries(path_planner_segment_cost ${catkin_LIBRARIES})
 cuda_add_executable(path_planner_segment_cost_pub_hmap
     src/007_path_planner_segment_cost/pub_hmap/main.cpp)
 target_link_libraries(path_planner_segment_cost_pub_hmap ${catkin_LIBRARIES})
+
+cuda_add_executable(path_planner_cost_map
+    src/008_path_planner_cost_map/main.cpp
+    src/008_path_planner_cost_map/ros_wrapper.cpp
+    src/008_path_planner_cost_map/gpu_path_planner.cu
+    src/008_path_planner_cost_map/gpu_errchk.cu)
+target_link_libraries(path_planner_cost_map ${catkin_LIBRARIES})
+cuda_add_executable(path_planner_cost_map_pub_hmap
+    src/008_path_planner_cost_map/pub_hmap/main.cpp)
+target_link_libraries(path_planner_cost_map_pub_hmap ${catkin_LIBRARIES})
+
+cuda_add_executable(path_planner_cost_map_local
+    src/009_path_planner_cost_map_local/main.cpp
+    src/009_path_planner_cost_map_local/ros_wrapper.cpp
+    src/009_path_planner_cost_map_local/gpu_path_planner.cu
+    src/009_path_planner_cost_map_local/gpu_errchk.cu)
+target_link_libraries(path_planner_cost_map_local ${catkin_LIBRARIES})
+cuda_add_executable(path_planner_cost_map_local_pub_hmap
+    src/009_path_planner_cost_map_local/pub_hmap/main.cpp)
+target_link_libraries(path_planner_cost_map_local_pub_hmap ${catkin_LIBRARIES})

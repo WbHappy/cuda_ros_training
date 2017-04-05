@@ -19,9 +19,9 @@ public:
     ~GPUPathPlanner();
 
     void gpuSetup(uint32_t hmap_rows, uint32_t hmap_cols);
-    void gpuCopyInputToDevice(double *&h_odom, double *&h_goal, uint8_t *&h_hmap);
+    void gpuCopyInputToDevice(double *h_odom, double *h_goal, uint8_t *h_hmap);
     void gpuExecuteKernel();
-    void gpuCopyOutputToHost(double *&h_cost);
+    void gpuCopyOutputToHost(double *h_cost, uint8_t *h_hmap);
     void gpuFree();
 };
 

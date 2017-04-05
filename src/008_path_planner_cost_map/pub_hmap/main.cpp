@@ -3,7 +3,7 @@
 
 int main(int argc, char** argv){
 
-    ros::init(argc, argv, "path_planner_segment_cost_pub_hmap");
+    ros::init(argc, argv, "path_planner_cost_map_pub_hmap");
     ros::NodeHandle nh;
     image_transport::ImageTransport it(nh);
 

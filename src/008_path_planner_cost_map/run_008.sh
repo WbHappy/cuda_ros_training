@@ -2,7 +2,7 @@
 
 touch pid.txt
 
-roslaunch cuda_training path_planner_segment_cost.launch &
+roslaunch cuda_training path_planner_cost_map.launch &
 echo $! >> pid.txt
 
 
@@ -49,3 +49,7 @@ pose:
     z: 0.0
     w: 0.0"  &
 echo $! >> pid.txt
+
+sleep 10
+
+./close_008.sh
