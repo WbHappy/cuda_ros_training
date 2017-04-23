@@ -48,6 +48,51 @@ __global__ void kernelPathPlanner(double *d_odom, double *d_goal, uint8_t *d_hma
     d_debug[0] = d_odom[0];
 }
 
+__global__ void kernelPathPlanner_SharedMemory(double *d_odom, double *d_goal, uint8_t *d_hmap, uint8_t *d_cmap, double *d_debug, uint32_t hmap_width, uint32_t cmap_width)
+{
+    uint32_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+    uint32_t idy = blockDim.y * blockIdx.y + threadIdx.y;
+
+    uint32_t cmap_idx = d_odom[0] + idx - LASER_RANGE;
+    uint32_t cmap_idy = d_odom[1] + idy - LASER_RANGE;
+    uint32_t cmap_tid = cmap_idx + cmap_idy * cmap_width;
+
+    uint32_t hmap_idx = d_odom[0] + idx - LASER_RANGE + MASK_OFFSET;
+    uint32_t hmap_idy = d_odom[1] + idy - LASER_RANGE + MASK_OFFSET;
+    uint32_t hmap_tid = hmap_idx + hmap_idy * hmap_width;
+
+    int32_t y_min = - MASK_OFFSET;
+    int32_t y_max = + MASK_OFFSET + 1;
+    int32_t x_min = - MASK_OFFSET;
+    int32_t x_max = + MASK_OFFSET + 1;
+
+    // Calculating average value for lmap
+    float avrg = 0;
+    for(int y = y_min; y < y_max; y++)
+    {
+        for(int x = x_min; x < x_max; x++)
+        {
+            avrg += (float) d_hmap[hmap_tid + y*hmap_width + x];
+        }
+    }
+    avrg /= (float) (MASK_SIZE * MASK_SIZE);
+
+
+    // Calculating varianve of lmap
+    float variance = 0;
+    for(int y = y_min; y < y_max; y++)
+    {
+        for(int x = x_min; x < x_max; x++)
+        {
+            float diff = (float) (avrg - d_hmap[hmap_tid + y*hmap_width + x]);
+            variance += diff * diff;
+        }
+    }
+    d_cmap[cmap_tid] = (uint8_t) (variance / 1024);
+
+    d_debug[0] = d_odom[0];
+}
+
 __global__ void kernelClearMemory(uint8_t *d_cmap)
 {
     uint32_t idx = blockDim.x * blockIdx.x + threadIdx.x;

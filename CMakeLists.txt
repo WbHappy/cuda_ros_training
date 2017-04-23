@@ -85,3 +85,13 @@ target_link_libraries(path_planner_cost_map_local ${catkin_LIBRARIES})
 cuda_add_executable(path_planner_cost_map_local_pub_hmap
     src/009_path_planner_cost_map_local/pub_hmap/main.cpp)
 target_link_libraries(path_planner_cost_map_local_pub_hmap ${catkin_LIBRARIES})
+
+cuda_add_executable(cuda_lidar_mapping
+    src/010_cuda_lidar_mapping/main.cpp
+    src/010_cuda_lidar_mapping/cuda_lidar_mapping.cu
+    src/010_cuda_lidar_mapping/gpu_errchk/gpu_errchk.cu
+    src/010_cuda_lidar_mapping/gpu_maps/_gpu_map_ui8.cu
+    src/010_cuda_lidar_mapping/gpu_maps/_robot_planner_maps.cpp
+    src/010_cuda_lidar_mapping/dh/lidar_dh.cpp
+    src/010_cuda_lidar_mapping/dh/ht_matrix.cpp)
+target_link_libraries(cuda_lidar_mapping ${catkin_LIBRARIES})
