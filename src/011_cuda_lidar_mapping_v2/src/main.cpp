@@ -5,11 +5,12 @@
 #include "../include/gpu_002_cost_mapping.cuh"
 #include "../include/gpu_003_path_planning.cuh"
 
+// #include "../include/utils.hpp"
 #include "../include/ht_matrix.hpp"
 
 #include "../include/ros/template_subscriber.hpp"
 #include "../include/ros/template_publisher.hpp"
-#include "../include/ros/utils.hpp"
+#include "../include/ros/ros_utils.hpp"
 
 _RobotPlannerMaps _RPM;
 _ROSBuffor _ROSBUFF;
@@ -38,6 +39,17 @@ int main(int argc, char** argv)
     nh.param(node_name + "/odom_topic", odom_topic, std::string("/kalman/simulation/navigation/perfect_odometry"));
     nh.param(node_name + "/lidar_enc_topic", lidar_enc_topic, std::string("/kalman/simulation/encoder/lidar_tower_abs/pose"));
     nh.param(node_name + "/lidar_scan_topic", lidar_scan_topic, std::string("/kalman/simulation/lidar"));
+
+    nh.param(node_name + "/dk_a1", _RPM.dk_a1, (float) -0.2);
+    nh.param(node_name + "/dk_d2", _RPM.dk_d2, (float) 0.5);
+    nh.param(node_name + "/dk_al3", _RPM.dk_al3, (float) 0.45);
+
+    nh.param(node_name + "/height_scale", _RPM.height_scale, (int) 100);
+
+    nh.param(node_name + "/map_scale", _RPM.map_scale, (int) 10 );
+    nh.param(node_name + "/map_pow2_divider", _RPM.map_pow2_divider, (int) 32);
+    nh.param(node_name + "/map_meters_offset", _RPM.map_meters_offset, (int) 15);
+    nh.param(node_name + "/cmap_refresh_radius_meters", _RPM.cmap_refresh_radius_meters, (int) 15);
 
     // ROS Communication
     TemplateSubscriber <geometry_msgs::PoseStamped> sub_goal(&nh , goal_topic, &_ROSBUFF.goal);

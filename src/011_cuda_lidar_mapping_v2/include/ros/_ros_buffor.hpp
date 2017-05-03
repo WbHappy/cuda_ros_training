@@ -20,10 +20,6 @@ public:
 
 public:
     _ROSBuffor(){
-        // this->goal = geometry_msgs::PoseStamped();
-        // this->odom = nav_msgs::Odometry();
-        // this->lidar_pose = std_msgs::Float64();
-        // this->laser_scan = sensor_msgs::LaserScan();
 
     }
 

@@ -73,7 +73,6 @@ GpuLidarMapping::GpuLidarMapping(_RobotPlannerMaps *_rpm, _ROSBuffor *_ros)
 }
 
 
-// TODO
 void GpuLidarMapping::copyInputToDevice()
 {
     // Copying laser scan to GPU
@@ -94,9 +93,9 @@ void GpuLidarMapping::executeKernel()
                     _ros->odom.pose.pose.orientation.z,
                     _ros->odom.pose.pose.orientation.w,
                     _ros->lidar_pose.data,
-                    -0.2,
-                    0.5,
-                    0.45);   // TODO
+                    _rpm->dk_a1,
+                    _rpm->dk_d2,
+                    _rpm->dk_al3);
 
     lidarMappingKernel <<< _rpm->laser_rays, 1 >>> (
         _rpm->dev_laser_scan,
@@ -116,14 +115,12 @@ void GpuLidarMapping::executeKernel()
 
 }
 
-// TODO
 void GpuLidarMapping::copyOutputToHost()
 {
     gpuErrchk( cudaMemcpy(_rpm->host_heightmap.data, _rpm->dev_heightmap.data, _rpm->dev_heightmap.size() * sizeof(int16_t), cudaMemcpyDeviceToHost) );
 }
 
 
-// TODO
 void GpuLidarMapping::display()
 {
     _rpm->host_heightmap.display("heightmap");

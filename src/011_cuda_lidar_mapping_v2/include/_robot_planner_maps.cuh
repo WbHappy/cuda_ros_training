@@ -1,6 +1,7 @@
 #ifndef _ROBOT_PLANNER_MAPS_CUH_
 #define _ROBOT_PLANNER_MAPS_CUH_
 
+// #include "utils.hpp"
 #include "ht_matrix.hpp"
 
 #include "cpu_map_i16.hpp"
@@ -32,21 +33,24 @@ public:
     HTMatrix dk_matrix;
     HTMatrixLidarCPU dk_cpu;
 
+    float* host_debug;
+
+
     float map_orient;       // Clock counter-wise angle between East and vector from Start to End points
     int map_scale;        // One meter in real world is equal to this number in map pixel position (X,Y)
     int height_scale;     // One meter in real world is equal to this number in map pixel value (Z)
-
 
     int map_pow2_divider;   // Map size must be divisible by this number
     int map_meters_offset;     // Minimum number of fields between Start/Stop points and edge of map
     int map_offset_pix;
 
-    int cmap_refresh_size;  // Size of square, within which costmap is refreshed in single iteration
+    int cmap_refresh_radius_meters;  // Radius of area, within which costmap is refreshed in single iteration
 
     int laser_rays;         // Number of lidar's laser rays
 
-
-    float* host_debug;
+    float dk_a1;    // Offset from rover center to LiDAR tower Z-axis
+    float dk_d2;    // Height from rover center to LiDAR scanner
+    float dk_al3;   // Angle of LiDAR tilt in its Y-axis
 
 public:
 

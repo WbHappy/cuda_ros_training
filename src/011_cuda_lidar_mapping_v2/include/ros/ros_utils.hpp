@@ -1,12 +1,10 @@
-#ifndef UTILS_HPP_
-#define UTILS_HPP_
+#ifndef ROS_UTILS_HPP_
+#define ROS_UTILS_HPP_
 
 #include <ros/ros.h>
 
 namespace utils
 {
-
-
 
     void waitFor(bool *value, ros::Rate* rate)
     {
