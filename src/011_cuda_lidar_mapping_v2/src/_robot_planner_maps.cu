@@ -15,18 +15,9 @@ _RobotPlannerMaps::_RobotPlannerMaps()
 
 _RobotPlannerMaps::~_RobotPlannerMaps()
 {
-    freeConstSizeMemory();
     freeMaps();
-    freeLaserScan();
 }
 
-
-
-
-void _RobotPlannerMaps::allocateConstSizeMemory()
-{
-    gpuErrchk(cudaMalloc((void**)&dev_dk_matrix, 16 * sizeof(double)) );
-}
 
 void _RobotPlannerMaps::allocateMaps(float target_east, float target_north)
 {
@@ -51,7 +42,6 @@ void _RobotPlannerMaps::allocateMaps(float target_east, float target_north)
     dev_costmap.allocate(map_size_y, map_size_x);
 
     dev_heightmap.fill(UNKNOWN);
-    dev_heightmap.drawCircle(init_circle_height, map_offset_pix, map_offset_pix, init_circle_radius); // -40 - height form rover center to bottom of its wheels
     dev_costmap.fill(0);
 
 
@@ -62,25 +52,12 @@ void _RobotPlannerMaps::allocateMaps(float target_east, float target_north)
     host_costmap.fill(127);
 
 
+// DEBUG
+    gpuErrchk(cudaMalloc((void**)&dev_debug, 1024 * sizeof(float)) );
+    host_debug = (float*)malloc(1024 * sizeof(float));
+
 }
 
-void _RobotPlannerMaps::allocateLaserScan(int laser_rays)
-{
-    this->laser_rays = laser_rays;
-    gpuErrchk(cudaMalloc((void**)&dev_laser_scan, laser_rays * sizeof(float)) );
-
-    gpuErrchk(cudaMalloc((void**)&dev_debug, laser_rays * sizeof(float)) );
-    host_debug = (float*)malloc(laser_rays * sizeof(float));
-}
-
-
-
-
-
-void _RobotPlannerMaps::freeConstSizeMemory()
-{
-    gpuErrchk( cudaFree(dev_dk_matrix) );
-}
 
 void _RobotPlannerMaps::freeMaps()
 {
@@ -89,16 +66,9 @@ void _RobotPlannerMaps::freeMaps()
 
     host_heightmap.release();
     host_costmap.release();
-}
-
-void _RobotPlannerMaps::freeLaserScan()
-{
-    gpuErrchk( cudaFree(dev_laser_scan) );
 
     gpuErrchk( cudaFree(dev_debug) );
 }
-
-
 
 
 
@@ -115,10 +85,10 @@ void _RobotPlannerMaps::resizeMaps(float target_east, float target_north)
 void _RobotPlannerMaps::cudaDebugInfo()
 {
 
-    gpuErrchk( cudaMemcpy(host_debug, dev_debug, laser_rays * sizeof(float), cudaMemcpyDeviceToHost) );
+    gpuErrchk( cudaMemcpy(host_debug, dev_debug, 1024 * sizeof(float), cudaMemcpyDeviceToHost) );
 
     printf("==== CUDA DEBUG ====\n");
-    for(int i = 0; i < laser_rays; i++)
+    for(int i = 0; i < 1024; i++)
     {
         printf("%f\n", host_debug[i]);
     }

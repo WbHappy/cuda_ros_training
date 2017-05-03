@@ -61,9 +61,9 @@ __global__ void lidarMappingKernel(float* laser_scan, int laser_rays,  HTMatrixL
         heightmap[point_map.x * map_y + point_map.y] = (int16_t) (point_world.z * height_scale);
     }
 
-
-
 }
+
+
 
 
 GpuLidarMapping::GpuLidarMapping(_RobotPlannerMaps *_rpm, _ROSBuffor *_ros)
@@ -73,10 +73,35 @@ GpuLidarMapping::GpuLidarMapping(_RobotPlannerMaps *_rpm, _ROSBuffor *_ros)
 }
 
 
+
+void GpuLidarMapping::allocateMemory(int laser_rays)
+{
+    this->laser_rays = laser_rays;
+    gpuErrchk(cudaMalloc((void**)&dev_laser_scan, laser_rays * sizeof(float)) );
+    gpuErrchk(cudaMalloc((void**)&dev_dk_matrix, 16 * sizeof(double)) );
+
+}
+
+
+void GpuLidarMapping::freeMemory()
+{
+    gpuErrchk( cudaFree(dev_dk_matrix) );
+    gpuErrchk( cudaFree(dev_laser_scan) );
+
+}
+
+
+void GpuLidarMapping::drawInitialHeightmapCircle()
+{
+    _rpm->dev_heightmap.drawCircle(init_circle_height, _rpm->map_offset_pix, _rpm->map_offset_pix, init_circle_radius); // -40 - height form rover center to bottom of its wheels
+}
+
+
+
 void GpuLidarMapping::copyInputToDevice()
 {
     // Copying laser scan to GPU
-    gpuErrchk( cudaMemcpy(_rpm->dev_laser_scan, &_ros->laser_scan.ranges[0], _rpm->laser_rays * sizeof(float), cudaMemcpyHostToDevice) );
+    gpuErrchk( cudaMemcpy(this->dev_laser_scan, &_ros->laser_scan.ranges[0], this->laser_rays * sizeof(float), cudaMemcpyHostToDevice) );
 
 }
 
@@ -84,7 +109,7 @@ void GpuLidarMapping::copyInputToDevice()
 void GpuLidarMapping::executeKernel()
 {
 
-    _rpm->dk_cpu = dkWorldToLidarReduced(
+    this->dk_cpu = dkWorldToLidarReduced(
                     _ros->odom.pose.pose.position.x,
                     _ros->odom.pose.pose.position.y,
                     _ros->odom.pose.pose.position.z,
@@ -93,22 +118,22 @@ void GpuLidarMapping::executeKernel()
                     _ros->odom.pose.pose.orientation.z,
                     _ros->odom.pose.pose.orientation.w,
                     _ros->lidar_pose.data,
-                    _rpm->dk_a1,
-                    _rpm->dk_d2,
-                    _rpm->dk_al3);
+                    this->dk_a1,
+                    this->dk_d2,
+                    this->dk_al3);
 
-    lidarMappingKernel <<< _rpm->laser_rays, 1 >>> (
-        _rpm->dev_laser_scan,
-        _rpm->laser_rays,
-        _rpm->dk_cpu,
-        _rpm->dev_heightmap.data,
-        _rpm->dev_heightmap.size_x,
-        _rpm->dev_heightmap.size_y,
-        _rpm->height_scale,
-        _rpm->map_scale,
-        _rpm->map_orient,
-        _rpm->map_offset_pix,
-        _rpm->dev_debug);
+    lidarMappingKernel <<< this->laser_rays, 1 >>> (
+                    this->dev_laser_scan,
+                    this->laser_rays,
+                    this->dk_cpu,
+                    _rpm->dev_heightmap.data,
+                    _rpm->dev_heightmap.size_x,
+                    _rpm->dev_heightmap.size_y,
+                    _rpm->height_scale,
+                    _rpm->map_scale,
+                    _rpm->map_orient,
+                    _rpm->map_offset_pix,
+                    _rpm->dev_debug);
 
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );

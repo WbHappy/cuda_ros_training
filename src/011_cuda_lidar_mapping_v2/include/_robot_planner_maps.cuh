@@ -19,9 +19,6 @@ public:
     GpuMapI16 dev_heightmap;
     GpuMapI16 dev_costmap;
 
-    float* dev_dk_matrix;
-    float* dev_laser_scan;
-
     float* dev_debug;
 
 
@@ -29,9 +26,6 @@ public:
 
     CpuMapI16 host_heightmap;
     CpuMapI16 host_costmap;
-
-    HTMatrix dk_matrix;
-    HTMatrixLidarCPU dk_cpu;
 
     float* host_debug;
 
@@ -44,18 +38,6 @@ public:
     int map_meters_offset;     // Minimum number of fields between Start/Stop points and edge of map
     int map_offset_pix;
 
-    int cmap_refresh_radius_meters;  // Radius of area, within which costmap is refreshed in single iteration
-
-    int laser_rays;         // Number of lidar's laser rays
-
-    float dk_a1;    // Offset from rover center to LiDAR tower Z-axis
-    float dk_d2;    // Height from rover center to LiDAR scanner
-    float dk_al3;   // Angle of LiDAR tilt in its Y-axis
-
-    // needed on the begin, to estimate height of area under rover, which cannot be mapped without moving
-    int init_circle_height;     // Initial height of circle - should be equal to height from rover center to bottom of wheel (negative number)
-    float init_circle_radius;   // Radius of start circle within which pixels are set to init_circle_height value
-
 public:
 
     _RobotPlannerMaps();
@@ -63,11 +45,9 @@ public:
 
     void allocateConstSizeMemory();
     void allocateMaps(float x_deviation_meters, float y_deviation_meters);
-    void allocateLaserScan(int laser_rays);
 
     void freeConstSizeMemory();
     void freeMaps();
-    void freeLaserScan();
 
     void resizeMaps(float x_deviation_meters, float y_deviation_meters);
 

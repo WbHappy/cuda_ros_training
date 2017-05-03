@@ -40,19 +40,22 @@ int main(int argc, char** argv)
     nh.param(node_name + "/lidar_enc_topic", lidar_enc_topic, std::string("/kalman/simulation/encoder/lidar_tower_abs/pose"));
     nh.param(node_name + "/lidar_scan_topic", lidar_scan_topic, std::string("/kalman/simulation/lidar"));
 
-    nh.param(node_name + "/dk_a1", _RPM.dk_a1, (float) -0.2);
-    nh.param(node_name + "/dk_d2", _RPM.dk_d2, (float) 0.5);
-    nh.param(node_name + "/dk_al3", _RPM.dk_al3, (float) 0.45);
 
     nh.param(node_name + "/height_scale", _RPM.height_scale, (int) 100);
 
     nh.param(node_name + "/map_scale", _RPM.map_scale, (int) 10 );
     nh.param(node_name + "/map_pow2_divider", _RPM.map_pow2_divider, (int) 32);
     nh.param(node_name + "/map_meters_offset", _RPM.map_meters_offset, (int) 15);
-    nh.param(node_name + "/cmap_refresh_radius_meters", _RPM.cmap_refresh_radius_meters, (int) 15);
 
-    nh.param(node_name + "/init_circle_height", _RPM.init_circle_height, (int) -40);
-    nh.param(node_name + "/init_circle_radius", _RPM.init_circle_radius, (float) 25.0);
+    nh.param(node_name + "/dk_a1", GLM.dk_a1, (float) -0.2);
+    nh.param(node_name + "/dk_d2", GLM.dk_d2, (float) 0.5);
+    nh.param(node_name + "/dk_al3", GLM.dk_al3, (float) 0.45);
+
+    nh.param(node_name + "/init_circle_height", GLM.init_circle_height, (int) -40);
+    nh.param(node_name + "/init_circle_radius", GLM.init_circle_radius, (float) 25.0);
+
+
+    // nh.param(node_name + "/cmap_refresh_radius_meters", _RPM.cmap_refresh_radius_meters, (int) 15);
 
     // ROS Communication
     TemplateSubscriber <geometry_msgs::PoseStamped> sub_goal(&nh , goal_topic, &_ROSBUFF.goal);
@@ -61,19 +64,17 @@ int main(int argc, char** argv)
     TemplateSubscriber <sensor_msgs::LaserScan> sub_lidar_scan(&nh , lidar_scan_topic, &_ROSBUFF.laser_scan, fncNewLidaraScan);
 
 
-    // Allocating const size memory blocks in CPU and GPU (like DH matrix)
-    _RPM.allocateConstSizeMemory();
-
     // Waiting for goal message
     utils::waitFor(&sub_goal.msg_recived, &wait_loop_rate, "waiting for goal message");
     // Allocating maps in CPU and GPU memory
     _RPM.allocateMaps(_ROSBUFF.goal.pose.position.x, _ROSBUFF.goal.pose.position.y);
-
+    // Drawing circle in 0 pose of robot on heightmap - terrain which cannot be mapped before moving
+    GLM.drawInitialHeightmapCircle();
 
     // Waiting lidar scan messages
     utils::waitFor(&sub_lidar_scan.msg_recived, &wait_loop_rate, "waiting for lidar scan message");
     // Allocating lidar scan array in CPU and GPU memory
-    _RPM.allocateLaserScan(_ROSBUFF.laser_scan.ranges.size());
+    GLM.allocateMemory(_ROSBUFF.laser_scan.ranges.size());
 
     // Waiting for odom, lidar_pose
     utils::waitFor(&sub_odom.msg_recived, &wait_loop_rate, "waiting for odom message");
@@ -92,5 +93,7 @@ int main(int argc, char** argv)
 
         main_loop_rate.sleep();
     }
+
+    return 0;
 
 }
