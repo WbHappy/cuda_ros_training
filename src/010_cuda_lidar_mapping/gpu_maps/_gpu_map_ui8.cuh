@@ -6,10 +6,10 @@
 
 class _GpuMap_UI8
 {
+public:
     int size_x;
     int size_y;
 
-public:
     uint8_t* data;
 
 
@@ -25,6 +25,8 @@ public:
     void resize(int size_x, int size_y);
     void fill(const uint8_t fill_value);
     void free();
+
+    int size(){return size_x * size_y;}
 
 };
 

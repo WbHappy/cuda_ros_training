@@ -1,0 +1,6 @@
+#ifndef GPU_002_COST_MAPPING_CUH_
+#define GPU_002_COST_MAPPING_CUH_
+
+
+
+#endif

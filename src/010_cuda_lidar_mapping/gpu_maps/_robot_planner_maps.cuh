@@ -9,14 +9,18 @@
 
 class _RobotPlannerMaps
 {
+public:
+// DEVICE MEMORY
     _GpuMap_UI8 dev_heightmap;
     _GpuMap_UI8 dev_costmap;
 
-    float* dev_dk_matrix;
+    double* dev_dk_matrix;
     float* dev_laser_scan;
 
+    float* dev_debug;
+    float* host_debug;
 
-
+// HOST MEMORY
     cv::Mat host_heightmap;
     cv::Mat host_costmap;
 
@@ -25,19 +29,27 @@ class _RobotPlannerMaps
 
     int map_pow2_divider;   // Map size must be divisible by this number
     int map_min_offset;     // Minimum number of fields between Start/Stop points and edge of map
+    int map_offset_pix;
 
     int cmap_refresh_size;  // Size of square, within which costmap is refreshed in single iteration
 
-public:
+    int laser_rays;         // Number of lidar's laser rays
+
     HTMatrix dk_matrix;
 
 public:
 
     _RobotPlannerMaps();
+    ~_RobotPlannerMaps();
 
     void allocateMaps(float x_deviation_meters, float y_deviation_meters);
     void resizeMaps(float x_deviation_meters, float y_deviation_meters);
     void freeMaps();
+
+    void allocateLaserScan(int laser_rays);
+    void freeLaserScan();
+
+    void cudaDebugInfo();
 
 
 };

@@ -68,10 +68,13 @@ void _GpuMap_UI8::fill(const uint8_t fill_value)
 
     int grid_x = (size_x + block_x - 1) / block_x;
     int grid_y = (size_y + block_y - 1) / block_y;
-    dim3 grid(grid_x, grid_y);
-    dim3 block(block_x, block_y);
+    dim3 grid(grid_x, grid_y, 1);
+    dim3 block(block_x, block_y, 1);
 
-    fillValueKernel<<< grid_x, block_x >>> (this->data, fill_value);
+    fillValueKernel<<< grid, block >>> (this->data, fill_value);
+    gpuErrchk( cudaPeekAtLastError() );
+    gpuErrchk( cudaDeviceSynchronize() );
+
 }
 
 

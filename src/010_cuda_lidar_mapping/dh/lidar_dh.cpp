@@ -1,10 +1,9 @@
 #include "lidar_dh.hpp"
 
 LidarDH::LidarDH(){
-
-    double a1 = 0.3;
-    double d2 = 0.7;
-    double al3 = 0.2;
+    double a1 = 0.3;    // Dist between rover center and tower z-axis
+    double d2 = 0.7;    // Height between rover center and Lidar
+    double al3 = 0.2;   // Lidar's const angle of rotation in x axis    //TODO CHANGE TO Y!
 }
 
 HTMatrix LidarDH::dkWorldToRover(double tx, double ty, double tz, double qx, double qy, double qz, double qw)
@@ -22,15 +21,16 @@ HTMatrix LidarDH::dkWorldToRover(double tx, double ty, double tz, double qx, dou
 HTMatrix LidarDH::dkRoverToLidar(double th2)
 {
 
-    double pi = 3.1416;
 
-    HTMatrix A1, A2, A3;
+    HTMatrix A1, A2, A3, A4;
 
     A1 = transX(-a1);
     A2 = rotZ(th2) * transZ(d2);
-    A3 = rotX(al3);
+    // A3 = rotX(al3);
+    A3 = rotZ(PI/2) * rotX(al3);
+    A4 = rotZ(-PI/2);
 
-    HTMatrix A = A1*A2*A3;
+    HTMatrix A = A1*A2*A3*A4;
 
     return A;
 }

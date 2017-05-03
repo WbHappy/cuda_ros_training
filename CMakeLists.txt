@@ -4,8 +4,7 @@ project(cuda_training)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_30,code=sm_30)
-
-find_package(CUDA REQUIRED)
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -w")
 
 find_package(catkin REQUIRED COMPONENTS
     roscpp
@@ -15,11 +14,19 @@ find_package(catkin REQUIRED COMPONENTS
     image_transport
 )
 
+find_package(CUDA REQUIRED)
+
 find_package(OpenCV 3.0.0 REQUIRED)
 
-include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+find_package(Boost)
+
+include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 catkin_package()
+
+cuda_add_executable(boost_bind_test
+src/000_boost_bind/main.cpp)
+target_link_libraries(boost_bind_test ${catkin_LIBRARIES})
 
 cuda_add_executable(hello_world
     src/001_hello_world/main.cu)
@@ -91,7 +98,18 @@ cuda_add_executable(cuda_lidar_mapping
     src/010_cuda_lidar_mapping/cuda_lidar_mapping.cu
     src/010_cuda_lidar_mapping/gpu_errchk/gpu_errchk.cu
     src/010_cuda_lidar_mapping/gpu_maps/_gpu_map_ui8.cu
-    src/010_cuda_lidar_mapping/gpu_maps/_robot_planner_maps.cpp
+    src/010_cuda_lidar_mapping/gpu_maps/_robot_planner_maps.cu
     src/010_cuda_lidar_mapping/dh/lidar_dh.cpp
     src/010_cuda_lidar_mapping/dh/ht_matrix.cpp)
 target_link_libraries(cuda_lidar_mapping ${catkin_LIBRARIES})
+
+cuda_add_executable(cuda_lidar_mapping_v2
+    src/011_cuda_lidar_mapping_v2/src/_robot_planner_maps.cu
+    src/011_cuda_lidar_mapping_v2/src/cpu_map_i16.cpp
+    src/011_cuda_lidar_mapping_v2/src/gpu_001_lidar_mapping.cu
+    src/011_cuda_lidar_mapping_v2/src/gpu_errchk.cu
+    src/011_cuda_lidar_mapping_v2/src/gpu_map_i16.cu
+    src/011_cuda_lidar_mapping_v2/src/ht_matrix.cpp
+    src/011_cuda_lidar_mapping_v2/src/main.cpp
+    )
+target_link_libraries(cuda_lidar_mapping_v2 ${catkin_LIBRARIES})
