@@ -1,10 +1,8 @@
 #include "../include/gpu_001_lidar_mapping.cuh"
 
-#define SCAN_ANGLE 4.7123889803846  // 270 degree
-
-__device__ inline float calcLaserAngle(float scan_angle, int laser_rays, int tid)
+__device__ inline float calcLaserAngle(int laser_rays, float angle_min, float angle_max, int tid)
 {
-    return ((float)tid+0.5)/laser_rays*SCAN_ANGLE - 0.5*SCAN_ANGLE;
+    return ((float)tid+0.5)/laser_rays*(angle_max - angle_min) + angle_min;
 }
 
 __device__ inline Point3F32 dkLidarToScan(HTMatrixLidarCPU* dk_cpu, float th5, float a5)
@@ -38,7 +36,20 @@ __device__ inline Point2I32 mapRealToGPU(float point_x, float point_y, float map
     return map_pose;
 }
 
-__global__ void lidarMappingKernel(float* laser_scan, int laser_rays,  HTMatrixLidarCPU dk_cpu, int16_t* heightmap, int map_x, int map_y, int height_scale, int map_scale, float map_orient, float map_offset_pix, float* debug)
+__global__ void lidarMappingKernel(
+                            float* laser_scan,
+                            HTMatrixLidarCPU dk_cpu,
+                            int laser_rays,
+                            float angle_min,
+                            float angle_max,
+                            int16_t* heightmap,
+                            int map_x,
+                            int map_y,
+                            int height_scale,
+                            int map_scale,
+                            float map_orient,
+                            float map_offset_pix,
+                            float* debug)
 {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -46,7 +57,7 @@ __global__ void lidarMappingKernel(float* laser_scan, int laser_rays,  HTMatrixL
     float a5 = laser_scan[tid];
 
     // ANGLE FROM MIDDLE OF SCANNING AREA
-    float th5 = calcLaserAngle(SCAN_ANGLE, laser_rays, tid);
+    float th5 = calcLaserAngle(laser_rays, angle_min, angle_max, tid);
 
     // GLOBAL POSITION OF POINT ON THE END OF THE SCAN
     Point3F32 point_world = dkLidarToScan(&dk_cpu, th5, a5);
@@ -74,9 +85,12 @@ GpuLidarMapping::GpuLidarMapping(_RobotPlannerMaps *_rpm, _ROSBuffor *_ros)
 
 
 
-void GpuLidarMapping::allocateMemory(int laser_rays)
+void GpuLidarMapping::allocateMemory(int laser_rays, float angle_min, float angle_max)
 {
     this->laser_rays = laser_rays;
+    this->angle_min = angle_min;
+    this->angle_max = angle_max;
+
     gpuErrchk(cudaMalloc((void**)&dev_laser_scan, laser_rays * sizeof(float)) );
     gpuErrchk(cudaMalloc((void**)&dev_dk_matrix, 16 * sizeof(double)) );
 
@@ -124,8 +138,10 @@ void GpuLidarMapping::executeKernel()
 
     lidarMappingKernel <<< this->laser_rays, 1 >>> (
                     this->dev_laser_scan,
-                    this->laser_rays,
                     this->dk_cpu,
+                    this->laser_rays,
+                    this->angle_min,
+                    this->angle_max,
                     _rpm->dev_heightmap.data,
                     _rpm->dev_heightmap.size_x,
                     _rpm->dev_heightmap.size_y,

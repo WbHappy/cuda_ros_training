@@ -74,7 +74,7 @@ int main(int argc, char** argv)
     // Waiting lidar scan messages
     utils::waitFor(&sub_lidar_scan.msg_recived, &wait_loop_rate, "waiting for lidar scan message");
     // Allocating lidar scan array in CPU and GPU memory
-    GLM.allocateMemory(_ROSBUFF.laser_scan.ranges.size());
+    GLM.allocateMemory(_ROSBUFF.laser_scan.ranges.size(), _ROSBUFF.laser_scan.angle_min, _ROSBUFF.laser_scan.angle_max);
 
     // Waiting for odom, lidar_pose
     utils::waitFor(&sub_odom.msg_recived, &wait_loop_rate, "waiting for odom message");

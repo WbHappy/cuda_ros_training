@@ -36,6 +36,9 @@ class GpuLidarMapping
 public:
     int laser_rays;         // Number of lidar's laser rays
 
+    float angle_min;
+    float angle_max;
+
     float dk_a1;    // Offset from rover center to LiDAR tower Z-axis
     float dk_d2;    // Height from rover center to LiDAR scanner
     float dk_al3;   // Angle of LiDAR tilt in its Y-axis
@@ -47,7 +50,7 @@ public:
 public:
     GpuLidarMapping(_RobotPlannerMaps *_rpm, _ROSBuffor *_ros);
 
-    void allocateMemory(int laser_rays);
+    void allocateMemory(int laser_rays, float angle_min, float angle_max);
     void freeMemory();
 
     void drawInitialHeightmapCircle();
