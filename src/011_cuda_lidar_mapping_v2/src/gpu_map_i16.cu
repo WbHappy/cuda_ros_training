@@ -1,14 +1,31 @@
 #include "../include/gpu_map_i16.cuh"
 
-__global__ void fillValueKernel(int16_t* data, int16_t fill_value)
+__global__ void fillValueKernel(int16_t* data, const int16_t fill_value)
 {
     int idx = blockDim.x * blockIdx.x + threadIdx.x;        // Globalny index x (kolumna na mapie wysokości)
     int idy = blockDim.y * blockIdx.y + threadIdx.y;        // Globalny index y (wiersz na mapie wysokości)
-    int tid = idx + idy * gridDim.x * blockDim.x;           // Globalny numer indeksu (adres pamięci na mapie wysokości)
+    int tid = idy + idx * gridDim.y * blockDim.y;           // Globalny numer indeksu (adres pamięci na mapie wysokości)
 
     data[tid] = fill_value;
 }
 
+__global__ void drawCircleKernel(int16_t* data, const int16_t fill_value, const int pose_x, const int pose_y, const float radius)
+{
+    int idx = blockDim.x * blockIdx.x + threadIdx.x;        // Globalny index x (kolumna na mapie wysokości)
+    int idy = blockDim.y * blockIdx.y + threadIdx.y;        // Globalny index y (wiersz na mapie wysokości)
+    int tid = idy + idx * gridDim.y * blockDim.y;           // Globalny numer indeksu (adres pamięci na mapie wysokości)
+
+    int dist_x = (idx - pose_x);
+    int dist_y = (idy - pose_y);
+
+    float dist_from_center = sqrtf((float)dist_x*dist_x + (float)dist_y*dist_y);
+
+    if(dist_from_center <= radius)
+    {
+        data[tid] = fill_value;
+    }
+
+}
 
 GpuMapI16::GpuMapI16(int size_x, int size_y)
 {
@@ -50,6 +67,22 @@ void GpuMapI16::fill(const int16_t fill_value)
     dim3 block(block_x, block_y, 1);
 
     fillValueKernel<<< grid, block >>> (this->data, fill_value);
+    gpuErrchk( cudaPeekAtLastError() );
+    gpuErrchk( cudaDeviceSynchronize() );
+
+}
+
+void GpuMapI16::drawCircle(const int16_t fill_value, const int pose_x, const int pose_y, const float radius)
+{
+    int block_x = 32;
+    int block_y = 32;
+
+    int grid_x = (size_x + block_x - 1) / block_x;
+    int grid_y = (size_y + block_y - 1) / block_y;
+    dim3 grid(grid_x, grid_y, 1);
+    dim3 block(block_x, block_y, 1);
+
+    drawCircleKernel<<< grid, block >>> (this->data, fill_value, pose_x, pose_y, radius);
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
 

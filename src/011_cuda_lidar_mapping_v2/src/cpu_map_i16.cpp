@@ -56,6 +56,8 @@ void CpuMapI16::display(std::string win_name)
     // Finding maximum and minium height
     for(int i = 0; i < size_x * size_y; i++)
     {
+        if(this->data[i] == UNKNOWN) continue;   // Unknown
+
         if(min_height > this->data[i]) min_height = this->data[i];
         if(max_height < this->data[i]) max_height = this->data[i];
     }
@@ -66,7 +68,7 @@ void CpuMapI16::display(std::string win_name)
         // Max and min height equal - cant do histogram equalization
         for(int i = 0; i < size_x * size_y; i++)
         {
-            this->img.data[i] = 127;
+            this->img.data[i] = 0;
         }
     }
     else
@@ -80,6 +82,11 @@ void CpuMapI16::display(std::string win_name)
 
         for(int i = 0; i < size_x * size_y; i++)
         {
+            if(this->data[i] == UNKNOWN)
+            {
+                this->img.data[i] = 0;
+                continue;
+            }
             this->img.data[i] = (uint8_t) ((this->data[i] - min_height) * 255.0 / height_amplitude);
         }
     }

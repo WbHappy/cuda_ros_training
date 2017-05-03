@@ -21,6 +21,7 @@ public:
     void allocate(int size_x, int size_y);
     void resize(int size_x, int size_y);
     void fill(const int16_t fill_value);
+    void drawCircle(const int16_t fill_value, const int pose_x, const int pose_y, const float radius);
     void release();
 
     int size(){return size_x * size_y;}

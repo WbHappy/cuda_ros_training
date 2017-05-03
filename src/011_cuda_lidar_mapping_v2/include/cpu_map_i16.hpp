@@ -1,6 +1,7 @@
 #ifndef CPU_MAP_I16_CUH_
 #define CPU_MAP_I16_CUH_
 
+#include "common.hpp"
 #include "opencv2/opencv.hpp"
 
 class CpuMapI16

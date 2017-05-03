@@ -50,7 +50,8 @@ void _RobotPlannerMaps::allocateMaps(float target_east, float target_north)
     dev_heightmap.allocate(map_size_y, map_size_x);
     dev_costmap.allocate(map_size_y, map_size_x);
 
-    dev_heightmap.fill(0);
+    dev_heightmap.fill(UNKNOWN);
+    dev_heightmap.drawCircle(init_circle_height, map_offset_pix, map_offset_pix, init_circle_radius); // -40 - height form rover center to bottom of its wheels
     dev_costmap.fill(0);
 
 

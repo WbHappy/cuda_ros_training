@@ -36,7 +36,7 @@ int main(int argc, char** argv)
     // Configureable parameters
     std::string goal_topic, odom_topic, lidar_enc_topic, lidar_scan_topic;
     nh.param(node_name + "/goal_topic", goal_topic, std::string("/kalman/simulation/navigation/goal"));
-    nh.param(node_name + "/odom_topic", odom_topic, std::string("/kalman/simulation/navigation/perfect_odometry"));
+    nh.param(node_name + "/odom_topic", odom_topic, std::string("/kalman/simulation/navigation/odom_ekf"));
     nh.param(node_name + "/lidar_enc_topic", lidar_enc_topic, std::string("/kalman/simulation/encoder/lidar_tower_abs/pose"));
     nh.param(node_name + "/lidar_scan_topic", lidar_scan_topic, std::string("/kalman/simulation/lidar"));
 
@@ -50,6 +50,9 @@ int main(int argc, char** argv)
     nh.param(node_name + "/map_pow2_divider", _RPM.map_pow2_divider, (int) 32);
     nh.param(node_name + "/map_meters_offset", _RPM.map_meters_offset, (int) 15);
     nh.param(node_name + "/cmap_refresh_radius_meters", _RPM.cmap_refresh_radius_meters, (int) 15);
+
+    nh.param(node_name + "/init_circle_height", _RPM.init_circle_height, (int) -40);
+    nh.param(node_name + "/init_circle_radius", _RPM.init_circle_radius, (float) 25.0);
 
     // ROS Communication
     TemplateSubscriber <geometry_msgs::PoseStamped> sub_goal(&nh , goal_topic, &_ROSBUFF.goal);

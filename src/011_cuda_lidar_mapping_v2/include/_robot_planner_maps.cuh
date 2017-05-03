@@ -1,7 +1,7 @@
 #ifndef _ROBOT_PLANNER_MAPS_CUH_
 #define _ROBOT_PLANNER_MAPS_CUH_
 
-// #include "utils.hpp"
+#include "common.hpp"
 #include "ht_matrix.hpp"
 
 #include "cpu_map_i16.hpp"
@@ -51,6 +51,10 @@ public:
     float dk_a1;    // Offset from rover center to LiDAR tower Z-axis
     float dk_d2;    // Height from rover center to LiDAR scanner
     float dk_al3;   // Angle of LiDAR tilt in its Y-axis
+
+    // needed on the begin, to estimate height of area under rover, which cannot be mapped without moving
+    int init_circle_height;     // Initial height of circle - should be equal to height from rover center to bottom of wheel (negative number)
+    float init_circle_radius;   // Radius of start circle within which pixels are set to init_circle_height value
 
 public:
 
