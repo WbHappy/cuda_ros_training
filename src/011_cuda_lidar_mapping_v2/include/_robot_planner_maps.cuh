@@ -29,6 +29,10 @@ public:
 
     float* host_debug;
 
+// HOST VARIABLES & PARAMETERS
+
+    int robot_onmap_x;
+    int robot_onmap_y;
 
     float map_orient;       // Clock counter-wise angle between East and vector from Start to End points
     int map_scale;        // One meter in real world is equal to this number in map pixel position (X,Y)
@@ -50,6 +54,8 @@ public:
     void freeMaps();
 
     void resizeMaps(float x_deviation_meters, float y_deviation_meters);
+
+    void updateRobotPoseOnMap(float point_x, float point_y);
 
     void cudaDebugInfo();
 };

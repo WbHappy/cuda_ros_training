@@ -5,7 +5,6 @@
 #include "../include/gpu_002_cost_mapping.cuh"
 #include "../include/gpu_003_path_planning.cuh"
 
-// #include "../include/utils.hpp"
 #include "../include/ht_matrix.hpp"
 
 #include "../include/ros/template_subscriber.hpp"
@@ -16,11 +15,11 @@ _RobotPlannerMaps _RPM;
 _ROSBuffor _ROSBUFF;
 
 GpuLidarMapping GLM(&_RPM, &_ROSBUFF);
+GpuCostMapping GCM(&_RPM, &_ROSBUFF);
 
 
-void fncNewLidaraScan()
+void updateRobotPoseOnMap()
 {
-
 }
 
 int main(int argc, char** argv)
@@ -36,32 +35,35 @@ int main(int argc, char** argv)
     // Configureable parameters
     std::string goal_topic, odom_topic, lidar_enc_topic, lidar_scan_topic;
     nh.param(node_name + "/goal_topic", goal_topic, std::string("/kalman/simulation/navigation/goal"));
-    nh.param(node_name + "/odom_topic", odom_topic, std::string("/kalman/simulation/navigation/odom_ekf"));
+    nh.param(node_name + "/odom_topic", odom_topic, std::string("/kalman/simulation/navigation/perfect_odometry"));
     nh.param(node_name + "/lidar_enc_topic", lidar_enc_topic, std::string("/kalman/simulation/encoder/lidar_tower_abs/pose"));
     nh.param(node_name + "/lidar_scan_topic", lidar_scan_topic, std::string("/kalman/simulation/lidar"));
 
 
     nh.param(node_name + "/height_scale", _RPM.height_scale, (int) 100);
-
     nh.param(node_name + "/map_scale", _RPM.map_scale, (int) 10 );
     nh.param(node_name + "/map_pow2_divider", _RPM.map_pow2_divider, (int) 32);
     nh.param(node_name + "/map_meters_offset", _RPM.map_meters_offset, (int) 15);
 
+
     nh.param(node_name + "/dk_a1", GLM.dk_a1, (float) -0.2);
     nh.param(node_name + "/dk_d2", GLM.dk_d2, (float) 0.5);
     nh.param(node_name + "/dk_al3", GLM.dk_al3, (float) 0.45);
-
     nh.param(node_name + "/init_circle_height", GLM.init_circle_height, (int) -40);
     nh.param(node_name + "/init_circle_radius", GLM.init_circle_radius, (float) 25.0);
 
 
-    // nh.param(node_name + "/cmap_refresh_radius_meters", _RPM.cmap_refresh_radius_meters, (int) 15);
+    nh.param(node_name + "/cmap_refresh_radius_meters", GCM.cmap_refresh_radius_meters, (float) 6.3);
+        GCM.cmap_refresh_radius_pix = (int)(GCM.cmap_refresh_radius_meters * _RPM.map_scale);
+    nh.param(node_name + "/cost_mask_radius", GCM.cost_mask_radius, (int) 16);
+    nh.param(node_name + "/empty_field_cost", GCM.empty_field_cost, (int) 100);
+    nh.param(node_name + "/costmap_borders_value", GCM.costmap_borders_value, (int) 100);
 
     // ROS Communication
     TemplateSubscriber <geometry_msgs::PoseStamped> sub_goal(&nh , goal_topic, &_ROSBUFF.goal);
-    TemplateSubscriber <nav_msgs::Odometry> sub_odom(&nh , odom_topic, &_ROSBUFF.odom);
+    TemplateSubscriber <nav_msgs::Odometry> sub_odom(&nh , odom_topic, &_ROSBUFF.odom, updateRobotPoseOnMap);
     TemplateSubscriber <std_msgs::Float64> sub_lidar_pose(&nh , lidar_enc_topic, &_ROSBUFF.lidar_pose);
-    TemplateSubscriber <sensor_msgs::LaserScan> sub_lidar_scan(&nh , lidar_scan_topic, &_ROSBUFF.laser_scan, fncNewLidaraScan);
+    TemplateSubscriber <sensor_msgs::LaserScan> sub_lidar_scan(&nh , lidar_scan_topic, &_ROSBUFF.laser_scan);
 
 
     // Waiting for goal message
@@ -70,6 +72,8 @@ int main(int argc, char** argv)
     _RPM.allocateMaps(_ROSBUFF.goal.pose.position.x, _ROSBUFF.goal.pose.position.y);
     // Drawing circle in 0 pose of robot on heightmap - terrain which cannot be mapped before moving
     GLM.drawInitialHeightmapCircle();
+    // Drawing borders of costmap - this terrain should not be allowed for rover
+    GCM.drawInitialCostmapBorders();
 
     // Waiting lidar scan messages
     utils::waitFor(&sub_lidar_scan.msg_recived, &wait_loop_rate, "waiting for lidar scan message");
@@ -85,11 +89,21 @@ int main(int argc, char** argv)
     {
         ros::spinOnce();
 
+        _RPM.updateRobotPoseOnMap(_ROSBUFF.odom.pose.pose.position.x, _ROSBUFF.odom.pose.pose.position.y);
+
         GLM.copyInputToDevice();
         GLM.executeKernel();
         GLM.copyOutputToHost();
-
         GLM.display();
+
+
+        GCM.copyInputToDevice();
+        GCM.executeKernel();
+        GCM.copyOutputToHost();
+        GCM.display();
+
+
+
 
         main_loop_rate.sleep();
     }

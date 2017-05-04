@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
+#include <cuda.h>
 
 HTMatrix dkWorldToLidar( double tx, double ty, double tz, double qx, double qy, double qz, double qw, double th2, const double a1, const double d2, const double al3);
 

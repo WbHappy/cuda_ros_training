@@ -22,6 +22,7 @@ public:
     void resize(int size_x, int size_y);
     void fill(const int16_t fill_value);
     void drawCircle(const int16_t fill_value, const int pose_x, const int pose_y, const float radius);
+    void drawBorders(const int16_t fill_value, const int thickness);
     void release();
 
     int size(){return size_x * size_y;}

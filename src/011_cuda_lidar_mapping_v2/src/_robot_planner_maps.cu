@@ -1,11 +1,5 @@
 #include "../include/_robot_planner_maps.cuh"
 
-int roundUpTo(int divider, int input)
-{
-    return ((input + divider - 1 ) / divider) * divider;
-}
-
-
 _RobotPlannerMaps::_RobotPlannerMaps()
 {
     dev_heightmap = GpuMapI16();
@@ -78,7 +72,15 @@ void _RobotPlannerMaps::resizeMaps(float target_east, float target_north)
     allocateMaps(target_east, target_north);
 }
 
+// Mirrored from __device__ mapRealToGPU()
+void _RobotPlannerMaps::updateRobotPoseOnMap(float point_x, float point_y)
+{
+    float point_orient = atan2f(point_y, point_x);
+    float point_dist = sqrtf(point_x*point_x + point_y*point_y);
 
+    this->robot_onmap_x = (int) (sinf(map_orient - point_orient) * point_dist * map_scale + map_offset_pix);
+    this->robot_onmap_y = (int) (cosf(map_orient - point_orient) * point_dist * map_scale + map_offset_pix);
+}
 
 
 

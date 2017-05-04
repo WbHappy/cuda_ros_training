@@ -5,7 +5,7 @@ __device__ inline float calcLaserAngle(int laser_rays, float angle_min, float an
     return ((float)tid+0.5)/laser_rays*(angle_max - angle_min) + angle_min;
 }
 
-__device__ inline Point3F32 dkLidarToScan(HTMatrixLidarCPU* dk_cpu, float th5, float a5)
+__device__ inline Point3F32 dkLidarToScan(const HTMatrixLidarCPU* dk_cpu, float th5, float a5)
 {
 
     Point3F32 point;
@@ -38,17 +38,17 @@ __device__ inline Point2I32 mapRealToGPU(float point_x, float point_y, float map
 
 __global__ void lidarMappingKernel(
                             float* laser_scan,
-                            HTMatrixLidarCPU dk_cpu,
-                            int laser_rays,
-                            float angle_min,
-                            float angle_max,
+                            const HTMatrixLidarCPU dk_cpu,
+                            const int laser_rays,
+                            const float angle_min,
+                            const float angle_max,
                             int16_t* heightmap,
-                            int map_x,
-                            int map_y,
-                            int height_scale,
-                            int map_scale,
-                            float map_orient,
-                            float map_offset_pix,
+                            const int map_x,
+                            const int map_y,
+                            const int height_scale,
+                            const int map_scale,
+                            const float map_orient,
+                            const float map_offset_pix,
                             float* debug)
 {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -123,6 +123,7 @@ void GpuLidarMapping::copyInputToDevice()
 void GpuLidarMapping::executeKernel()
 {
 
+    // CPU part
     this->dk_cpu = dkWorldToLidarReduced(
                     _ros->odom.pose.pose.position.x,
                     _ros->odom.pose.pose.position.y,
@@ -136,6 +137,7 @@ void GpuLidarMapping::executeKernel()
                     this->dk_d2,
                     this->dk_al3);
 
+    // GPU part
     lidarMappingKernel <<< this->laser_rays, 1 >>> (
                     this->dev_laser_scan,
                     this->dk_cpu,

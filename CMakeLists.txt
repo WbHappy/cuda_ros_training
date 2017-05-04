@@ -107,6 +107,7 @@ cuda_add_executable(cuda_lidar_mapping_v2
     src/011_cuda_lidar_mapping_v2/src/_robot_planner_maps.cu
     src/011_cuda_lidar_mapping_v2/src/cpu_map_i16.cpp
     src/011_cuda_lidar_mapping_v2/src/gpu_001_lidar_mapping.cu
+    src/011_cuda_lidar_mapping_v2/src/gpu_002_cost_mapping.cu
     src/011_cuda_lidar_mapping_v2/src/gpu_errchk.cu
     src/011_cuda_lidar_mapping_v2/src/gpu_map_i16.cu
     src/011_cuda_lidar_mapping_v2/src/ht_matrix.cpp
