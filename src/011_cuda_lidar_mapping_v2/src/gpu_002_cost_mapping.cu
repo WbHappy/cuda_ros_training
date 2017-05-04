@@ -140,7 +140,8 @@ __device__ void calcCostVariance(
                             const int stid,
                             const int sidx,
                             const int sidy,
-                            const int shared_dim_y
+                            const int shared_dim_y,
+                            const int unknown_field_cost
 )
 {
     float avrg = 0;
@@ -149,27 +150,45 @@ __device__ void calcCostVariance(
 
     int smem_idx = sidx * shared_dim_y + sidy;
 
+    int known_heights_conuter = 0;
+    int unknown_heights_conuter = 0;
+
     for(int x = 0; x < mask_dim; x++)
     {
         for(int y = 0; y < mask_dim; y++)
         {
-            avrg += (float) smem_hmap[smem_idx + x*shared_dim_y + y];
+            if(smem_hmap[smem_idx + x*shared_dim_y + y] != UNKNOWN)
+            {
+                avrg += (float) smem_hmap[smem_idx + x*shared_dim_y + y];
+                known_heights_conuter++;
+            }
+            else
+            {
+                unknown_heights_conuter++;
+            }
         }
     }
-    avrg /= (float) (mask_dim * mask_dim);
+    avrg /= (float) known_heights_conuter;
 
-    // costmap[pix_id] = (int16_t) (avrg);
 
     float variance = 0;
     for(int x = 0; x < mask_dim; x++)
     {
         for(int y = 0; y < mask_dim; y++)
         {
-            float diff = (float) (avrg - smem_hmap[smem_idx + x*shared_dim_y + y]);
-            variance += diff * diff;
+            if(smem_hmap[smem_idx + x*shared_dim_y + y] != UNKNOWN)
+            {
+                float diff = (float) (avrg - smem_hmap[smem_idx + x*shared_dim_y + y]);
+                variance += diff * diff;
+            }
         }
     }
-    costmap[pix_id] = (int16_t) (variance / 1024 / 1024 / 1024);
+
+    variance = sqrtf(variance);
+
+    int pixel_cost = variance + unknown_heights_conuter * unknown_field_cost;
+
+    costmap[pix_id] = (int16_t) (pixel_cost);
 }
 
 
@@ -185,7 +204,7 @@ __global__ void costMappingKernel(
                             const int shared_dim_y,
                             const int cmap_refresh_radius_pix,
                             const int cost_mask_radius,
-                            const int empty_field_cost)
+                            const int unknown_field_cost)
 {
     int idx = blockDim.x * blockIdx.x + threadIdx.x;
     int idy = blockDim.y * blockIdx.y + threadIdx.y;
@@ -255,7 +274,8 @@ __global__ void costMappingKernel(
                                                     stid,
                                                     sidx,
                                                     sidy,
-                                                    shared_dim_y
+                                                    shared_dim_y,
+                                                    unknown_field_cost
                                             );
                                         }
     }
@@ -318,7 +338,7 @@ void GpuCostMapping::executeKernel()
         shared_dim_y,
         this->cmap_refresh_radius_pix,
         this->cost_mask_radius,
-        this->empty_field_cost);
+        this->unknown_field_cost);
 
         gpuErrchk( cudaPeekAtLastError() );
         gpuErrchk( cudaDeviceSynchronize() );

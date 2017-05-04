@@ -53,11 +53,11 @@ int main(int argc, char** argv)
     nh.param(node_name + "/init_circle_radius", GLM.init_circle_radius, (float) 25.0);
 
 
-    nh.param(node_name + "/cmap_refresh_radius_meters", GCM.cmap_refresh_radius_meters, (float) 6.3);
+    nh.param(node_name + "/cmap_refresh_radius_meters", GCM.cmap_refresh_radius_meters, (float) 15);
         GCM.cmap_refresh_radius_pix = (int)(GCM.cmap_refresh_radius_meters * _RPM.map_scale);
     nh.param(node_name + "/cost_mask_radius", GCM.cost_mask_radius, (int) 16);
-    nh.param(node_name + "/empty_field_cost", GCM.empty_field_cost, (int) 100);
-    nh.param(node_name + "/costmap_borders_value", GCM.costmap_borders_value, (int) 100);
+    nh.param(node_name + "/unknown_field_cost", GCM.unknown_field_cost, (int) 1);
+    nh.param(node_name + "/costmap_borders_value", GCM.costmap_borders_value, (int) 1000);
 
     // ROS Communication
     TemplateSubscriber <geometry_msgs::PoseStamped> sub_goal(&nh , goal_topic, &_ROSBUFF.goal);

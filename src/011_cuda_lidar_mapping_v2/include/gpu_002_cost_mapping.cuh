@@ -22,7 +22,7 @@ public:
     int cmap_refresh_radius_pix;
 
     int cost_mask_radius;   // "Radius" of square making mask for pixel cost calculation (for 31x31 square "Radius" will be 16)
-    int empty_field_cost;   // Cost of empty pixel
+    int unknown_field_cost;   // Cost of empty pixel
 
     int costmap_borders_value; // Value assigned to borders of costmap - it should be high enought to not allow rover to travell there
 
