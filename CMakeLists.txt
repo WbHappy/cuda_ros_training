@@ -3,7 +3,11 @@ project(cuda_training)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_30,code=sm_30)
+
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-arch=sm_72;-std=c++11;--ptxas-options=-v)
+
+
+#set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_30,code=sm_30)
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -w")
 
 find_package(catkin REQUIRED COMPONENTS
@@ -16,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(CUDA REQUIRED)
 
-find_package(OpenCV 3.0.0 REQUIRED)
+find_package(OpenCV REQUIRED)
 
 find_package(Boost)
 
